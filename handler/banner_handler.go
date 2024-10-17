@@ -36,8 +36,8 @@ func (h *BannerHandler) Create(c *fiber.Ctx) error {
 	if err := h.Service.Create(&banner); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-
-	banner.Image = fmt.Sprintf("http://localhost:5000/%s", banner.Image)
+	api := "api/admin"
+	banner.Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, banner.Image)
 	return c.Status(fiber.StatusCreated).JSON(banner)
 }
 
@@ -61,9 +61,10 @@ func (h *BannerHandler) GetPaginated(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Bannerler ýüklenip bilinmedi"})
 	}
 
+	api := "api/admin"
 	// Her bir banneriň surat URL-ni düzetmek
 	for i := range banners {
-		banners[i].Image = fmt.Sprintf("http://localhost:5000/%s", banners[i].Image)
+		banners[i].Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, banners[i].Image)
 	}
 
 	return c.JSON(fiber.Map{
@@ -89,8 +90,9 @@ func (h *BannerHandler) GetByID(c *fiber.Ctx) error {
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Banner tapylmady"})
 	}
+	api := "api/admin"
 
-	banner.Image = fmt.Sprintf("http://localhost:5000/%s", banner.Image)
+	banner.Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, banner.Image)
 	return c.JSON(banner)
 }
 
@@ -174,7 +176,7 @@ func (h *BannerHandler) Update(c *fiber.Ctx) error {
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Banner üýtgedilip bilinmedi"})
 	}
-
-	updatedBannerResult.Image = fmt.Sprintf("http://localhost:5000/%s", updatedBannerResult.Image)
+	api := "api/admin"
+	updatedBannerResult.Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, banner.Image)
 	return c.JSON(updatedBannerResult)
 }

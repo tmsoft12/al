@@ -58,10 +58,10 @@ func (h *EmployerHandler) GetPaginated(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Isgarler ýüklenip bilinmedi"})
 	}
-
+	api := "api/admin"
 	// Her bir isgarin surat URL-ni düzetmek
 	for i := range employer {
-		employer[i].Image = fmt.Sprintf("http://localhost:5000/%s", employer[i].Image)
+		employer[i].Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, employer[i].Image)
 	}
 
 	return c.JSON(fiber.Map{
