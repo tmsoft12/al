@@ -47,3 +47,7 @@ func SetupMediaRoutes(app *fiber.App, Handler *handler.MediaHandler) {
 	News.Put("media/:id", Handler.Update)
 
 }
+func AdminRoutes(app *fiber.App, adminHandler *handler.AdminHandler) {
+	app.Post("/register", adminHandler.Register)
+	app.Post("/login", adminHandler.Login)
+}

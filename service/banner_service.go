@@ -2,11 +2,11 @@ package service
 
 import (
 	"rr/domain"
-	"rr/repostrory"
+	repository "rr/repostory"
 )
 
 type BannerService struct {
-	Repo *repostrory.BannerRepo
+	Repo *repository.BannerRepo
 }
 
 func (s *BannerService) Create(t *domain.Banner) error {

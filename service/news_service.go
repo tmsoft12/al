@@ -2,12 +2,12 @@ package service
 
 import (
 	"rr/domain"
-	"rr/repostrory"
+	repository "rr/repostory"
 	"time"
 )
 
 type NewsService struct {
-	Repo *repostrory.NewsRepo
+	Repo *repository.NewsRepo
 }
 
 func (s *NewsService) Create(t *domain.News) error {

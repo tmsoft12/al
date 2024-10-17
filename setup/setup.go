@@ -2,14 +2,15 @@ package setup
 
 import (
 	"rr/handler"
-	"rr/repostrory"
+	repository "rr/repostory"
+
 	"rr/service"
 
 	"gorm.io/gorm"
 )
 
 func SetupServices(db *gorm.DB) *handler.BannerHandler {
-	bannerRepo := &repostrory.BannerRepo{DB: db}
+	bannerRepo := &repository.BannerRepo{DB: db}
 	bannerService := &service.BannerService{Repo: bannerRepo}
 	bannerHandler := &handler.BannerHandler{Service: bannerService}
 
@@ -17,7 +18,7 @@ func SetupServices(db *gorm.DB) *handler.BannerHandler {
 }
 
 func SetupEmployerServices(db *gorm.DB) *handler.EmployerHandler {
-	employerRepo := &repostrory.EmployerRepo{DB: db}
+	employerRepo := &repository.EmployerRepo{DB: db}
 	employerService := &service.EmployerService{Repo: employerRepo}
 	employerHandler := &handler.EmployerHandler{Service: employerService}
 
@@ -25,14 +26,14 @@ func SetupEmployerServices(db *gorm.DB) *handler.EmployerHandler {
 }
 
 func SetupNewsServices(db *gorm.DB) *handler.NewsHandler {
-	newsRepo := &repostrory.NewsRepo{DB: db}
+	newsRepo := &repository.NewsRepo{DB: db}
 	newsService := &service.NewsService{Repo: newsRepo}
 	newsHandler := &handler.NewsHandler{Service: newsService}
 
 	return newsHandler
 }
 func SetupMediaServices(db *gorm.DB) *handler.MediaHandler {
-	mediaRepo := &repostrory.MediaRepo{DB: db}
+	mediaRepo := &repository.MediaRepo{DB: db}
 	mediaService := &service.MediaService{Repo: mediaRepo}
 	mediaHandler := &handler.MediaHandler{Service: mediaService}
 

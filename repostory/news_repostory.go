@@ -1,4 +1,4 @@
-package repostrory
+package repository
 
 import (
 	"rr/domain"

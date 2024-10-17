@@ -2,11 +2,11 @@ package service
 
 import (
 	"rr/domain"
-	"rr/repostrory"
+	repository "rr/repostory"
 )
 
 type MediaService struct {
-	Repo *repostrory.MediaRepo
+	Repo *repository.MediaRepo
 }
 
 func (s *MediaService) Create(t *domain.Media) error {

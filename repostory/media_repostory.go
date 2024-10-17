@@ -1,7 +1,8 @@
-package repostrory
+package repository
 
 import (
 	"rr/domain"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -11,6 +12,9 @@ type MediaRepo struct {
 }
 
 func (r *MediaRepo) Create(t *domain.Media) error {
+	if t.Date == "" {
+		t.Date = time.Now().Format("2006-01-02 15:04:05")
+	}
 	return r.DB.Create(t).Error
 }
 func (r *MediaRepo) FindAll() ([]domain.Media, error) {

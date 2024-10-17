@@ -3,11 +3,11 @@ package service
 import (
 	"errors"
 	"rr/domain"
-	"rr/repostrory"
+	repository "rr/repostory"
 )
 
 type EmployerService struct {
-	Repo *repostrory.EmployerRepo
+	Repo *repository.EmployerRepo
 }
 
 func (s *EmployerService) Create(t *domain.Employer) error {
