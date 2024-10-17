@@ -31,9 +31,19 @@ func SetupNewsRoutes(app *fiber.App, Handler *handler.NewsHandler) {
 	News := app.Group("api/admin/")
 	News.Static("uploads", "./uploads")
 	News.Post("news", Handler.Create)
-	News.Get("newss/:id", Handler.GetByID)
+	News.Get("news/:id", Handler.GetByID)
 	News.Get("news/", Handler.GetPaginated)
-	News.Delete("News/:id", Handler.Delete)
+	News.Delete("news/:id", Handler.Delete)
 	News.Put("news/:id", Handler.Update)
+
+}
+func SetupMediaRoutes(app *fiber.App, Handler *handler.MediaHandler) {
+	News := app.Group("api/admin/")
+	News.Static("uploads", "./uploads")
+	News.Post("media", Handler.Create)
+	News.Get("media/:id", Handler.GetByID)
+	News.Get("media/", Handler.GetPaginated)
+	News.Delete("media/:id", Handler.Delete)
+	News.Put("media/:id", Handler.Update)
 
 }

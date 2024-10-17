@@ -31,3 +31,10 @@ func SetupNewsServices(db *gorm.DB) *handler.NewsHandler {
 
 	return newsHandler
 }
+func SetupMediaServices(db *gorm.DB) *handler.MediaHandler {
+	mediaRepo := &repostrory.MediaRepo{DB: db}
+	mediaService := &service.MediaService{Repo: mediaRepo}
+	mediaHandler := &handler.MediaHandler{Service: mediaService}
+
+	return mediaHandler
+}
