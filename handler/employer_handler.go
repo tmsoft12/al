@@ -174,7 +174,7 @@ func (h *EmployerHandler) Update(c *fiber.Ctx) error {
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Isgarler üýtgedilip bilinmedi"})
 	}
-
-	updatedEmployerResult.Image = fmt.Sprintf("http://localhost:5000/%s", updatedEmployerResult.Image)
+	api := "api/admin"
+	updatedEmployerResult.Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, employer.Image)
 	return c.JSON(updatedEmployerResult)
 }

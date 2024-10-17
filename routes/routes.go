@@ -21,5 +21,8 @@ func SetupEmployerRoutes(app *fiber.App, Handler *handler.EmployerHandler) {
 	Employer := app.Group("api/admin/")
 	Employer.Post("employers", Handler.Create)
 	Employer.Get("employers/:id", Handler.GetByID)
+	Employer.Get("employers/", Handler.GetPaginated)
+	Employer.Delete("employers/:id", Handler.Delete)
+	Employer.Put("employers/:id", Handler.Update)
 
 }
