@@ -16,3 +16,10 @@ func SetupRoutes(app *fiber.App, Handler *handler.BannerHandler) {
 	Admin.Put("banners/:id", Handler.Update)
 
 }
+
+func SetupEmployerRoutes(app *fiber.App, Handler *handler.EmployerHandler) {
+	Employer := app.Group("api/admin/")
+	Employer.Post("employers", Handler.Create)
+	Employer.Get("employers/:id", Handler.GetByID)
+
+}

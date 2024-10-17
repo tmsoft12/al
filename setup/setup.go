@@ -15,3 +15,11 @@ func SetupServices(db *gorm.DB) *handler.BannerHandler {
 
 	return bannerHandler
 }
+
+func SetupEmployerServices(db *gorm.DB) *handler.EmployerHandler {
+	employerRepo := &repostrory.EmployerRepo{DB: db}
+	employerService := &service.EmployerService{Repo: employerRepo}
+	employerHandler := &handler.EmployerHandler{Service: employerService}
+
+	return employerHandler
+}
