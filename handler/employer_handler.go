@@ -34,7 +34,9 @@ func (h *EmployerHandler) Create(c *fiber.Ctx) error {
 	if err := h.Service.Create(&employer); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	employer.Image = fmt.Sprintf("http://localhost:5000/%s", employer.Image)
+	api := "api/admin"
+
+	employer.Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, employer.Image)
 	return c.Status(fiber.StatusCreated).JSON(employer)
 
 }

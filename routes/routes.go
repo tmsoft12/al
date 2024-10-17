@@ -19,10 +19,21 @@ func SetupRoutes(app *fiber.App, Handler *handler.BannerHandler) {
 
 func SetupEmployerRoutes(app *fiber.App, Handler *handler.EmployerHandler) {
 	Employer := app.Group("api/admin/")
+	Employer.Static("uploads", "./uploads")
 	Employer.Post("employers", Handler.Create)
 	Employer.Get("employers/:id", Handler.GetByID)
 	Employer.Get("employers/", Handler.GetPaginated)
 	Employer.Delete("employers/:id", Handler.Delete)
 	Employer.Put("employers/:id", Handler.Update)
+
+}
+func SetupNewsRoutes(app *fiber.App, Handler *handler.NewsHandler) {
+	News := app.Group("api/admin/")
+	News.Static("uploads", "./uploads")
+	News.Post("news", Handler.Create)
+	News.Get("newss/:id", Handler.GetByID)
+	News.Get("news/", Handler.GetPaginated)
+	News.Delete("News/:id", Handler.Delete)
+	News.Put("news/:id", Handler.Update)
 
 }

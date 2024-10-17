@@ -23,3 +23,11 @@ func SetupEmployerServices(db *gorm.DB) *handler.EmployerHandler {
 
 	return employerHandler
 }
+
+func SetupNewsServices(db *gorm.DB) *handler.NewsHandler {
+	newsRepo := &repostrory.NewsRepo{DB: db}
+	newsService := &service.NewsService{Repo: newsRepo}
+	newsHandler := &handler.NewsHandler{Service: newsService}
+
+	return newsHandler
+}
