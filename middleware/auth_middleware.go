@@ -1,23 +1,22 @@
+// middleware/auth_middleware.go
 package middleware
 
 import (
+	"rr/service"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 )
 
-func JWTMiddleware(secret string) fiber.Handler {
+func JWTProtected() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		cookie := c.Cookies("jwt")
 		if cookie == "" {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthenticated"})
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
 		}
 
-		token, err := jwt.Parse(cookie, func(token *jwt.Token) (interface{}, error) {
-			return []byte(secret), nil
-		})
-
+		token, err := service.ValidateToken(cookie)
 		if err != nil || !token.Valid {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthenticated"})
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
 		}
 
 		return c.Next()

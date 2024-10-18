@@ -2,53 +2,59 @@ package routes
 
 import (
 	"rr/handler"
+	"rr/middleware"
 	"rr/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupRoutes(app *fiber.App, Handler *handler.BannerHandler) {
-	Admin := app.Group("api/admin/")
+func SetupRoutes(app *fiber.App, BannerHandler *handler.BannerHandler, EmployerHandler *handler.EmployerHandler, NewsHandler *handler.NewsHandler, MediaHandler *handler.MediaHandler) {
+
+	// General admin group
+	Admin := app.Group("api/admin/", middleware.JWTProtected())
+
+	// Banners routes
 	Admin.Static("uploads", "./uploads")
-	Admin.Post("banners", Handler.Create)
-	Admin.Get("banners", Handler.GetPaginated)
-	Admin.Get("banners/:id", Handler.GetByID)
-	Admin.Delete("banners/:id", Handler.Delete)
-	Admin.Put("banners/:id", Handler.Update)
+	Admin.Post("banners", BannerHandler.Create)
+	Admin.Get("banners", BannerHandler.GetPaginated)
+	Admin.Get("banners/:id", BannerHandler.GetByID)
+	Admin.Delete("banners/:id", BannerHandler.Delete)
+	Admin.Put("banners/:id", BannerHandler.Update)
 
-}
+	// Employers routes
+	Admin.Post("employers", EmployerHandler.Create)
+	Admin.Get("employers/:id", EmployerHandler.GetByID)
+	Admin.Get("employers", EmployerHandler.GetPaginated)
+	Admin.Delete("employers/:id", EmployerHandler.Delete)
+	Admin.Put("employers/:id", EmployerHandler.Update)
 
-func SetupEmployerRoutes(app *fiber.App, Handler *handler.EmployerHandler) {
-	Employer := app.Group("api/admin/")
-	Employer.Static("uploads", "./uploads")
-	Employer.Post("employers", Handler.Create)
-	Employer.Get("employers/:id", Handler.GetByID)
-	Employer.Get("employers/", Handler.GetPaginated)
-	Employer.Delete("employers/:id", Handler.Delete)
-	Employer.Put("employers/:id", Handler.Update)
+	// News routes
+	Admin.Post("news", NewsHandler.Create)
+	Admin.Get("news/:id", NewsHandler.GetByID)
+	Admin.Get("news", NewsHandler.GetPaginated)
+	Admin.Delete("news/:id", NewsHandler.Delete)
+	Admin.Put("news/:id", NewsHandler.Update)
 
-}
-func SetupNewsRoutes(app *fiber.App, Handler *handler.NewsHandler) {
+	// Media routes
+	Media := Admin.Group("media")
+	Media.Get("/video/:video", utils.Play)
+	Media.Post("/", MediaHandler.Create)
+	Media.Get("/:id", MediaHandler.GetByID)
+	Media.Get("/", MediaHandler.GetPaginated)
+	Media.Delete("/:id", MediaHandler.Delete)
+	Media.Put("/:id", MediaHandler.Update)
 
-	News := app.Group("api/admin/")
-	News.Static("uploads", "./uploads")
-	News.Post("news", Handler.Create)
-	News.Get("news/:id", Handler.GetByID)
-	News.Get("news/", Handler.GetPaginated)
-	News.Delete("news/:id", Handler.Delete)
-	News.Put("news/:id", Handler.Update)
-
-}
-func SetupMediaRoutes(app *fiber.App, Handler *handler.MediaHandler) {
-	Media := app.Group("api/admin/")
-
-	Media.Get("/media/video/:video", utils.Play)
-
-	Media.Post("media", Handler.Create)
-	Media.Get("media/:id", Handler.GetByID)
-	Media.Get("media/", Handler.GetPaginated)
-	Media.Delete("media/:id", Handler.Delete)
-	Media.Put("media/:id", Handler.Update)
-
+	// Static folder for uploads
 	app.Static("/uploads", "./uploads")
+}
+
+func AuthRoutes(app *fiber.App) {
+	app.Post("/register", handler.Register)
+	app.Post("/login", handler.Login)
+	app.Post("/logout", handler.Logout)
+
+	// Protected route, requires JWT authentication
+	app.Get("/protected", middleware.JWTProtected(), func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{"message": "You are authorized"})
+	})
 }
