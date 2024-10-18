@@ -39,3 +39,9 @@ func SetupMediaServices(db *gorm.DB) *handler.MediaHandler {
 
 	return mediaHandler
 }
+func SetupLaws(db *gorm.DB) *handler.LawsHandler {
+	lawsRepo := &repository.LawsRepo{DB: db}
+	lawsService := &service.LawsService{Repo: lawsRepo}
+	lawsHandler := &handler.LawsHandler{Service: lawsService}
+	return lawsHandler
+}

@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupRoutes(app *fiber.App, BannerHandler *handler.BannerHandler, EmployerHandler *handler.EmployerHandler, NewsHandler *handler.NewsHandler, MediaHandler *handler.MediaHandler) {
+func SetupRoutes(app *fiber.App, BannerHandler *handler.BannerHandler, EmployerHandler *handler.EmployerHandler, NewsHandler *handler.NewsHandler, MediaHandler *handler.MediaHandler, LawsHandler *handler.LawsHandler) {
 
 	// General admin group with JWT protection
 	Admin := app.Group("api/admin/", middleware.JWTProtected())
@@ -43,7 +43,13 @@ func SetupRoutes(app *fiber.App, BannerHandler *handler.BannerHandler, EmployerH
 	Media.Get("/", MediaHandler.GetPaginated)
 	Media.Delete("/:id", MediaHandler.Delete)
 	Media.Put("/:id", MediaHandler.Update)
-
+	//Laws routes
+	Laws := Admin.Group("laws")
+	Laws.Post("/", LawsHandler.Create)
+	Laws.Get("/:id", LawsHandler.GetByID)
+	Laws.Get("/", LawsHandler.GetPaginated)
+	Laws.Delete("/:id", LawsHandler.Delete)
+	Laws.Put("/:id", LawsHandler.Update)
 	// Protecting uploads with JWT middleware
 	app.Static("/uploads", "./uploads", fiber.Static{
 		Browse: true, // Optional: to allow browsing files in folder

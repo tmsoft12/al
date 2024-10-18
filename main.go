@@ -25,9 +25,9 @@ func main() {
 	HandlerEmployer := setup.SetupEmployerServices(database.DB)
 	HandlerNews := setup.SetupNewsServices(database.DB)
 	HandlerMedia := setup.SetupMediaServices(database.DB)
-
+	HandlerLaws := setup.SetupLaws(database.DB)
 	// Setup all resource routes in one call
-	routes.SetupRoutes(app, HandlerBanner, HandlerEmployer, HandlerNews, HandlerMedia)
+	routes.SetupRoutes(app, HandlerBanner, HandlerEmployer, HandlerNews, HandlerMedia, HandlerLaws)
 
 	// Start server on port 5000
 	app.Listen(":5000")

@@ -10,7 +10,7 @@ import (
 func GetMediaByLanguage(c *fiber.Ctx) error {
 	language := c.Query("language") // Query bilen dil almak
 	if language == "" {
-		language = "en" // Eger dil ýok bolsa, "en" kesgitlenýär
+		language = "tm" // Eger dil ýok bolsa, "en" kesgitlenýär
 	}
 
 	media, err := repository.GetMediaByLanguage(language)
