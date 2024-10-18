@@ -6,6 +6,7 @@ import (
 	"rr/setup"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 )
 
 func main() {
@@ -16,6 +17,7 @@ func main() {
 	app := fiber.New(fiber.Config{
 		BodyLimit: 500 * 1024 * 1024, // 500MB limit
 	})
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	// Authentication routes
 	routes.AuthRoutes(app)

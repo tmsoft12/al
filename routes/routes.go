@@ -10,7 +10,7 @@ import (
 
 func SetupRoutes(app *fiber.App, BannerHandler *handler.BannerHandler, EmployerHandler *handler.EmployerHandler, NewsHandler *handler.NewsHandler, MediaHandler *handler.MediaHandler) {
 
-	// General admin group
+	// General admin group with JWT protection
 	Admin := app.Group("api/admin/", middleware.JWTProtected())
 
 	// Banners routes
@@ -44,8 +44,18 @@ func SetupRoutes(app *fiber.App, BannerHandler *handler.BannerHandler, EmployerH
 	Media.Delete("/:id", MediaHandler.Delete)
 	Media.Put("/:id", MediaHandler.Update)
 
-	// Static folder for uploads
-	app.Static("/uploads", "./uploads")
+	// Protecting uploads with JWT middleware
+	app.Static("/uploads", "./uploads", fiber.Static{
+		Browse: true, // Optional: to allow browsing files in folder
+		Next: func(c *fiber.Ctx) bool {
+			// Call JWTProtected and check for error
+			if err := middleware.JWTProtected()(c); err != nil {
+				return true // Block access to static files
+			}
+			return false // Allow access to static files
+		},
+	})
+
 }
 
 func AuthRoutes(app *fiber.App) {
