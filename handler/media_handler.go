@@ -71,9 +71,11 @@ func (h *MediaHandler) GetPaginated(c *fiber.Ctx) error {
 	}
 	api := "api/admin"
 	// Her bir isgarin surat URL-ni düzetmek
-	for i := range media {
-		media[i].Video = fmt.Sprintf("http://localhost:5000/%s/%s", api, media[i].Video)
-	}
+	utils.UrlCom(media, api)
+
+	// for i := range media {
+	// 	media[i].Video = fmt.Sprintf("http://localhost:5000/%s/%s", api, media[i].Video)
+	// }
 	for i := range media {
 		media[i].Cover = fmt.Sprintf("http://localhost:5000/%s/%s", api, media[i].Cover)
 	}

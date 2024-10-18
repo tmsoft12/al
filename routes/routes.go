@@ -2,6 +2,7 @@ package routes
 
 import (
 	"rr/handler"
+	"rr/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -39,15 +40,13 @@ func SetupNewsRoutes(app *fiber.App, Handler *handler.NewsHandler) {
 }
 func SetupMediaRoutes(app *fiber.App, Handler *handler.MediaHandler) {
 	News := app.Group("api/admin/")
+	News.Get("/uploads/media/video/:video", utils.Play)
 	News.Static("uploads", "./uploads")
+
 	News.Post("media", Handler.Create)
 	News.Get("media/:id", Handler.GetByID)
 	News.Get("media/", Handler.GetPaginated)
 	News.Delete("media/:id", Handler.Delete)
 	News.Put("media/:id", Handler.Update)
 
-}
-func AdminRoutes(app *fiber.App, adminHandler *handler.AdminHandler) {
-	app.Post("/register", adminHandler.Register)
-	app.Post("/login", adminHandler.Login)
 }
