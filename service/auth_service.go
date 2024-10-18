@@ -1,4 +1,3 @@
-// service/auth_service.go
 package service
 
 import (
@@ -13,7 +12,7 @@ import (
 
 var jwtSecret = []byte("your_secret_key")
 
-// Register user with bcrypt hashed password
+// Ulanyjyny bcrypt bilen şifrelenen paroly bilen hasaba al
 func RegisterUser(db *gorm.DB, username string, password string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -24,22 +23,22 @@ func RegisterUser(db *gorm.DB, username string, password string) error {
 	return db.Create(&user).Error
 }
 
-// Authenticate user and generate JWT token
+// Ulanyjyny tassyklap, JWT token döret
 func LoginUser(db *gorm.DB, username string, password string) (string, error) {
 	var user domain.User
 	if err := db.Where("username = ?", username).First(&user).Error; err != nil {
-		return "", errors.New("invalid username or password")
+		return "", errors.New("nädogry ulanyjy ýa-da parol")
 	}
 
 	err := bcrypt.CompareHashAndPassword(user.Password, []byte(password))
 	if err != nil {
-		return "", errors.New("invalid username or password")
+		return "", errors.New("nädogry ulanyjy ýa-da parol")
 	}
 
-	// Generate JWT token
+	// JWT token döret
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": user.Username,
-		"exp":      time.Now().Add(time.Hour * 24).Unix(), // 24 hour expiration
+		"exp":      time.Now().Add(time.Hour * 24).Unix(), // 24 sagat möhlet
 	})
 
 	tokenString, err := token.SignedString(jwtSecret)
@@ -50,11 +49,11 @@ func LoginUser(db *gorm.DB, username string, password string) (string, error) {
 	return tokenString, nil
 }
 
-// Validate JWT token
+// JWT token-y tassyklamak
 func ValidateToken(tokenString string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid signing method")
+			return nil, errors.New("nädogry ýazuw usuly")
 		}
 		return jwtSecret, nil
 	})
