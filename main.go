@@ -17,8 +17,8 @@ func main() {
 		BodyLimit: 500 * 1024 * 1024, // 500MB limit
 	})
 
-	// Authentication routes
 	routes.AuthRoutes(app)
+	routes.SetupHome(app)
 
 	// Setup services for different resources
 	HandlerBanner := setup.SetupServices(database.DB)

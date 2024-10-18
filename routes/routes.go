@@ -68,3 +68,7 @@ func AuthRoutes(app *fiber.App) {
 		return c.JSON(fiber.Map{"message": "You are authorized"})
 	})
 }
+func SetupHome(app *fiber.App) {
+	Home := app.Group("/home")
+	Home.Get("/", handler.GetMediaByLanguage)
+}
