@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"rr/domain"
 	"rr/service"
 	"rr/utils"
@@ -17,13 +18,12 @@ type MediaHandler struct {
 	Service *service.MediaService
 }
 
-// Employer döretmek üçin funksiýa
-
 func (h *MediaHandler) Create(c *fiber.Ctx) error {
 	var media domain.Media
 	if err := c.BodyParser(&media); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Serwerde ýalňyşlyk: Maglumatlar işlenip bilinmedi"})
 	}
+
 	// Täze faýl adyny döretmek
 	newCover := "cover_" + time.Now().Format("20060102150405")
 	coverPath, err := utils.UploadFile(c, "cover", "uploads/media/cover", newCover)
@@ -37,14 +37,17 @@ func (h *MediaHandler) Create(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Media ýüklenip bilinmedi"})
 	}
-	media.Video = videoPath
+
+	// Faýlyň uzynlygyny alýarys (örn: .mp4, .avi we ş.m.)
+	videoExt := filepath.Ext(videoPath)
+	media.Video = newFileName + videoExt // Faýlyň uzynlygyny goşmak
 
 	if err := h.Service.Create(&media); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	api := "api/admin"
-	media.Video = fmt.Sprintf("http://localhost:5000/%s/%s", api, media.Video)
+	media.Video = fmt.Sprintf("http://localhost:5000/%s/media/video/%s", api, media.Video)
 	media.Cover = fmt.Sprintf("http://localhost:5000/%s/%s", api, media.Cover)
 
 	return c.Status(fiber.StatusCreated).JSON(media)

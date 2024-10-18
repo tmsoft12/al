@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -14,6 +15,6 @@ func Play(c *fiber.Ctx) error {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "File not found"})
 	}
-
+	fmt.Print("salam")
 	return c.SendFile(filePath, false)
 }

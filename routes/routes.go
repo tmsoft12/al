@@ -29,6 +29,7 @@ func SetupEmployerRoutes(app *fiber.App, Handler *handler.EmployerHandler) {
 
 }
 func SetupNewsRoutes(app *fiber.App, Handler *handler.NewsHandler) {
+
 	News := app.Group("api/admin/")
 	News.Static("uploads", "./uploads")
 	News.Post("news", Handler.Create)
@@ -39,14 +40,15 @@ func SetupNewsRoutes(app *fiber.App, Handler *handler.NewsHandler) {
 
 }
 func SetupMediaRoutes(app *fiber.App, Handler *handler.MediaHandler) {
-	News := app.Group("api/admin/")
-	News.Get("/uploads/media/video/:video", utils.Play)
-	News.Static("uploads", "./uploads")
+	Media := app.Group("api/admin/")
 
-	News.Post("media", Handler.Create)
-	News.Get("media/:id", Handler.GetByID)
-	News.Get("media/", Handler.GetPaginated)
-	News.Delete("media/:id", Handler.Delete)
-	News.Put("media/:id", Handler.Update)
+	Media.Get("/media/video/:video", utils.Play)
 
+	Media.Post("media", Handler.Create)
+	Media.Get("media/:id", Handler.GetByID)
+	Media.Get("media/", Handler.GetPaginated)
+	Media.Delete("media/:id", Handler.Delete)
+	Media.Put("media/:id", Handler.Update)
+
+	app.Static("/uploads", "./uploads")
 }
