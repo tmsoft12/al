@@ -14,6 +14,12 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	videoPath = "uploads/media/video/"
+	coverPath = "uploads/media/cover/"
+	apiBase   = "api/admin"
+)
+
 type MediaHandler struct {
 	Service *service.MediaService
 }
@@ -26,14 +32,14 @@ func (h *MediaHandler) Create(c *fiber.Ctx) error {
 
 	// Täze faýl adyny döretmek
 	newCover := "cover_" + time.Now().Format("20060102150405")
-	coverPath, err := utils.UploadFile(c, "cover", "uploads/media/cover", newCover)
+	coverPath, err := utils.UploadFile(c, "cover", coverPath, newCover)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cover ýüklenip bilinmedi"})
 	}
 	media.Cover = coverPath
 
 	newFileName := "video_" + time.Now().Format("20060102150405")
-	videoPath, err := utils.UploadFile(c, "video", "uploads/media/video", newFileName)
+	videoPath, err := utils.UploadFile(c, "video", videoPath, newFileName)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Media ýüklenip bilinmedi"})
 	}
@@ -41,19 +47,20 @@ func (h *MediaHandler) Create(c *fiber.Ctx) error {
 	// Faýlyň uzynlygyny alýarys (örn: .mp4, .avi we ş.m.)
 	videoExt := filepath.Ext(videoPath)
 	media.Video = newFileName + videoExt // Faýlyň uzynlygyny goşmak
+	coverExt := filepath.Ext(coverPath)
+	media.Cover = newCover + coverExt // Faýlyň uzynlygyny goşmak
 
 	if err := h.Service.Create(&media); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	api := "api/admin"
-	media.Video = fmt.Sprintf("http://localhost:5000/%s/media/video/%s", api, media.Video)
-	media.Cover = fmt.Sprintf("http://localhost:5000/%s/%s", api, media.Cover)
+	media.Video = fmt.Sprintf("http://localhost:5000/%s/media/video/%s", apiBase, media.Video)
+	media.Cover = fmt.Sprintf("http://localhost:5000/%s/uploads/media/cover/%s", apiBase, media.Cover)
 
 	return c.Status(fiber.StatusCreated).JSON(media)
 }
 
-// Mediai sahypa boýunça getirmek
+// Media sahypa boýunça getirmek
 func (h *MediaHandler) GetPaginated(c *fiber.Ctx) error {
 	page := c.Query("page", "1")
 	limit := c.Query("limit", "10")
@@ -72,15 +79,12 @@ func (h *MediaHandler) GetPaginated(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Media ýüklenip bilinmedi"})
 	}
-	api := "api/admin"
-	// Her bir isgarin surat URL-ni düzetmek
-	utils.UrlCom(media, api)
 
-	// for i := range media {
-	// 	media[i].Video = fmt.Sprintf("http://localhost:5000/%s/%s", api, media[i].Video)
-	// }
+	// Her bir isgarin surat URL-ni düzetmek
+	utils.UrlCom(media, apiBase, "media/video")
+
 	for i := range media {
-		media[i].Cover = fmt.Sprintf("http://localhost:5000/%s/%s", api, media[i].Cover)
+		media[i].Cover = fmt.Sprintf("http://localhost:5000/%s/%s", apiBase, media[i].Cover)
 	}
 
 	return c.JSON(fiber.Map{
@@ -96,9 +100,7 @@ func (h *MediaHandler) GetByID(c *fiber.Ctx) error {
 	idStr := c.Params("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Nädogry ID"},
-		)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Nädogry ID"})
 	}
 
 	media, err := h.Service.GetByID(uint(id))
@@ -108,9 +110,16 @@ func (h *MediaHandler) GetByID(c *fiber.Ctx) error {
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Media tapylmady"})
 	}
-	api := "api/admin"
-	media.Video = fmt.Sprintf("http://localhost:5000/%s/%s", api, media.Video)
-	media.Cover = fmt.Sprintf("http://localhost:5000/%s/%s", api, media.Cover)
+
+	ip := os.Getenv("BASE_URL")
+	port := os.Getenv("PORT")
+	if ip == "" || port == "" {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Sazlamalar ýalňyş"})
+	}
+
+	media.Video = fmt.Sprintf("http://%s:%s/%s/media/video/%s", ip, port, apiBase, media.Video)
+	media.Cover = fmt.Sprintf("http://%s:%s/%s/uploads/media/cover/%s", ip, port, apiBase, media.Cover)
+
 	return c.JSON(media)
 }
 
@@ -122,7 +131,7 @@ func (h *MediaHandler) Delete(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Nädogry ID"})
 	}
 
-	medai, err := h.Service.GetByID(uint(id))
+	media, err := h.Service.GetByID(uint(id))
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Media tapylmady"})
@@ -136,16 +145,15 @@ func (h *MediaHandler) Delete(c *fiber.Ctx) error {
 	}
 
 	// Suraty pozmak
-	if medai.Video != "" {
-		videoPath := medai.Video
-
-		if err := os.Remove(videoPath); err != nil {
+	if media.Video != "" {
+		videoFilePath := filepath.Join(videoPath, media.Video)
+		if err := os.Remove(videoFilePath); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Video pozulyp bilinmedi"})
 		}
 	}
-	if medai.Cover != "" {
-		coverPath := medai.Cover
-		if err := os.Remove(coverPath); err != nil {
+	if media.Cover != "" {
+		coverFilePath := filepath.Join(coverPath, media.Cover)
+		if err := os.Remove(coverFilePath); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Cover pozulyp bilinmedi"})
 		}
 	}
@@ -175,14 +183,17 @@ func (h *MediaHandler) Update(c *fiber.Ctx) error {
 	}
 
 	// Täze video faýl ýüklenipmi?
-	if file, err := c.FormFile("video"); err == nil && file != nil {
+	if _, err := c.FormFile("video"); err == nil {
+		videoFilePath := filepath.Join(videoPath, media.Video)
+
 		if media.Video != "" {
-			if err := os.Remove(media.Video); err != nil {
+			fmt.Println(videoFilePath)
+			if err := os.Remove(videoFilePath); err != nil {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Köne video pozulyp bilinmedi"})
 			}
 		}
 		newFileName := fmt.Sprintf("mediaUpdate_%s", time.Now().Format("20060102150405"))
-		videoPath, err := utils.UploadFile(c, "video", "uploads/media/video", newFileName)
+		videoPath, err := utils.UploadFile(c, "video", videoPath, newFileName)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Täze video ýüklenip bilinmedi"})
 		}
@@ -192,14 +203,15 @@ func (h *MediaHandler) Update(c *fiber.Ctx) error {
 	}
 
 	// Täze cover faýl ýüklenipmi?
-	if file, err := c.FormFile("cover"); err == nil && file != nil {
+	if _, err := c.FormFile("cover"); err == nil {
+		coverFilePath := filepath.Join(coverPath, media.Cover)
 		if media.Cover != "" {
-			if err := os.Remove(media.Cover); err != nil {
+			if err := os.Remove(coverFilePath); err != nil {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Köne cover pozulyp bilinmedi"})
 			}
 		}
 		newFileName := fmt.Sprintf("mediaCoverUpdate_%s", time.Now().Format("20060102150405"))
-		coverPath, err := utils.UploadFile(c, "cover", "uploads/media/cover", newFileName)
+		coverPath, err := utils.UploadFile(c, "cover", coverPath, newFileName)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Täze cover ýüklenip bilinmedi"})
 		}
@@ -215,7 +227,13 @@ func (h *MediaHandler) Update(c *fiber.Ctx) error {
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Media üýtgedilip bilinmedi"})
 	}
-	api := "api/admin"
-	updatedMediaResult.Video = fmt.Sprintf("http://localhost:5000/%s/%s", api, media.Video)
+
+	ip := os.Getenv("BASE_URL")
+	port := os.Getenv("PORT")
+	if ip == "" || port == "" {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Sazlamalar ýalňyş"})
+	}
+	updatedMediaResult.Video = fmt.Sprintf("http://%s:%s/%s/media/video/%s", ip, port, apiBase, media.Video)
+
 	return c.JSON(updatedMediaResult)
 }

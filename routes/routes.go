@@ -11,7 +11,7 @@ import (
 func SetupRoutes(app *fiber.App, BannerHandler *handler.BannerHandler, EmployerHandler *handler.EmployerHandler, NewsHandler *handler.NewsHandler, MediaHandler *handler.MediaHandler, LawsHandler *handler.LawsHandler) {
 
 	// General admin group with JWT protection
-	Admin := app.Group("api/admin/", middleware.JWTProtected())
+	Admin := app.Group("api/admin/")
 
 	// Banners routes
 	Admin.Static("uploads", "./uploads")

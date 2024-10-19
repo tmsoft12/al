@@ -35,8 +35,10 @@ func (h *EmployerHandler) Create(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	api := "api/admin"
+	ip := os.Getenv("BASE_URL")
+	port := os.Getenv("PORT")
 
-	employer.Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, employer.Image)
+	employer.Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, employer.Image)
 	return c.Status(fiber.StatusCreated).JSON(employer)
 
 }
@@ -61,9 +63,12 @@ func (h *EmployerHandler) GetPaginated(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Isgarler ýüklenip bilinmedi"})
 	}
 	api := "api/admin"
+	ip := os.Getenv("BASE_URL")
+	port := os.Getenv("PORT")
+
 	// Her bir isgarin surat URL-ni düzetmek
 	for i := range employer {
-		employer[i].Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, employer[i].Image)
+		employer[i].Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, employer[i].Image)
 	}
 
 	return c.JSON(fiber.Map{
@@ -92,10 +97,14 @@ func (h *EmployerHandler) GetByID(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Isgarler tapylmady"})
 	}
 	api := "api/admin"
-	employer.Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, employer.Image)
+	ip := os.Getenv("BASE_URL")
+	port := os.Getenv("PORT")
+
+	employer.Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, employer.Image)
 	return c.JSON(employer)
 }
 
+// Isgar pozmak üçin funksiýa
 // Isgar pozmak üçin funksiýa
 func (h *EmployerHandler) Delete(c *fiber.Ctx) error {
 	idStr := c.Params("id")
@@ -107,25 +116,29 @@ func (h *EmployerHandler) Delete(c *fiber.Ctx) error {
 	employer, err := h.Service.GetByID(uint(id))
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Isgarler tapylmady"})
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Isgar tapylmady"})
 		}
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Isgarler tapylmady"})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Isgar tapylmady"})
 	}
 
-	// Isgarler pozmak
+	// Isgar pozmak
 	if err := h.Service.Delete(uint(id)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Isgarler pozulyp bilinmedi"})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Isgar pozulyp bilinmedi"})
 	}
 
 	// Suraty pozmak
 	if employer.Image != "" {
-		imagePath := employer.Image
-		if err := os.Remove(imagePath); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Surat pozulyp bilinmedi"})
+		t := employer.Image
+		fmt.Println("Pozuljak faýl:", t)
+		err := utils.DeleteFileWithRetry(t)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": fmt.Sprintf("Surat pozulyp bilinmedi: %v", err)})
+		} else {
+			fmt.Println("Surat üstünlikli pozuldy.")
 		}
 	}
 
-	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"message": "Isgarler üstünlikli pozuldy"})
+	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"message": "Isgar üstünlikli pozuldy"})
 }
 
 // Isgar üýtgetmek üçin funksiýa
@@ -177,6 +190,9 @@ func (h *EmployerHandler) Update(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Isgarler üýtgedilip bilinmedi"})
 	}
 	api := "api/admin"
-	updatedEmployerResult.Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, employer.Image)
+	ip := os.Getenv("BASE_URL")
+	port := os.Getenv("PORT")
+
+	employer.Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, employer.Image)
 	return c.JSON(updatedEmployerResult)
 }

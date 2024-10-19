@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"rr/database"
 	"rr/routes"
 	"rr/setup"
@@ -28,7 +29,7 @@ func main() {
 	HandlerLaws := setup.SetupLaws(database.DB)
 	// Setup all resource routes in one call
 	routes.SetupRoutes(app, HandlerBanner, HandlerEmployer, HandlerNews, HandlerMedia, HandlerLaws)
-
+	ip := os.Getenv("BASE_URL")
 	// Start server on port 5000
-	app.Listen(":5000")
+	app.Listen(ip + ":5000")
 }
