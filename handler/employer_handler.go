@@ -193,6 +193,7 @@ func (h *EmployerHandler) Update(c *fiber.Ctx) error {
 	ip := os.Getenv("BASE_URL")
 	port := os.Getenv("PORT")
 
-	employer.Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, employer.Image)
+	updatedEmployerResult.Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, updatedEmployer.Image)
+	fmt.Println(updatedEmployerResult)
 	return c.JSON(updatedEmployerResult)
 }

@@ -37,7 +37,10 @@ func (h *NewsHandler) Create(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	api := "api/admin"
-	news.Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, news.Image)
+	ip := os.Getenv("BASE_URL")
+	port := os.Getenv("PORT")
+
+	news.Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, news.Image)
 	return c.Status(fiber.StatusCreated).JSON(news)
 }
 
@@ -62,9 +65,11 @@ func (h *NewsHandler) GetPaginated(c *fiber.Ctx) error {
 	}
 
 	api := "api/admin"
-	// Her bir newsiň surat URL-ni düzetmek
+	ip := os.Getenv("BASE_URL")
+	port := os.Getenv("PORT")
+
 	for i := range news {
-		news[i].Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, news[i].Image)
+		news[i].Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, news[i].Image)
 	}
 
 	return c.JSON(fiber.Map{
@@ -91,8 +96,10 @@ func (h *NewsHandler) GetByID(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "news tapylmady"})
 	}
 	api := "api/admin"
+	ip := os.Getenv("BASE_URL")
+	port := os.Getenv("PORT")
 
-	news.Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, news.Image)
+	news.Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, news.Image)
 	return c.JSON(news)
 }
 
@@ -113,16 +120,20 @@ func (h *NewsHandler) Delete(c *fiber.Ctx) error {
 	}
 
 	// newsi pozmak
-	if err := h.Service.Delete(uint(id)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "news pozulyp bilinmedi"})
-	}
 
 	// Suraty pozmak
 	if news.Image != "" {
-		imagePath := news.Image
-		if err := os.Remove(imagePath); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Surat pozulyp bilinmedi"})
+		t := news.Image
+		fmt.Println("Pozuljak faýl:", t)
+		err := utils.DeleteFileWithRetry(t)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": fmt.Sprintf("Surat pozulyp bilinmedi: %v", err)})
+		} else {
+			fmt.Println("Surat üstünlikli pozuldy.")
 		}
+	}
+	if err := h.Service.Delete(uint(id)); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "news pozulyp bilinmedi"})
 	}
 
 	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"message": "news üstünlikli pozuldy"})
@@ -176,9 +187,11 @@ func (h *NewsHandler) Update(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Habarlar üýtgedilip bilinmedi"})
 	}
 
-	// Surat URL-ni düzetmek
 	api := "api/admin"
-	updatedNewsResult.Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, updatedNewsResult.Image)
+	ip := os.Getenv("BASE_URL")
+	port := os.Getenv("PORT")
+
+	updatedNewsResult.Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, updatedNews.Image)
 
 	return c.JSON(updatedNewsResult)
 }

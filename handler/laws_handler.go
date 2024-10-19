@@ -109,7 +109,7 @@ func (h *LawsHandler) Update(c *fiber.Ctx) error {
 	}
 
 	// ID bilen Laws ýazgyny tapmak
-	existingLaws, err := h.Service.GetByID(uint(id))
+	existingLaws, err := h.Service.GetByID(uint(id)) // İki değer alıyoruz
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Laws tapylmady"})
@@ -123,15 +123,20 @@ func (h *LawsHandler) Update(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Nädogry maglumatlar"})
 	}
 
-	// ExistingLaws bilen täzeden birleşdirmek
+	// Boş olmayan alanlarla mevcut kaydı güncelle
 	if updatedLaws.Laws != "" {
-		existingLaws.Laws = updatedLaws.Laws // Maglumatlary täzelemek
+		existingLaws.Laws = updatedLaws.Laws
+	}
+
+	if updatedLaws.Title != "" {
+		existingLaws.Title = updatedLaws.Title
 	}
 
 	// Üýtgedilen Laws ýazgyny database'e ýazmak
-	if updatedLawsResult, err := h.Service.Update(uint(id), existingLaws); err != nil {
+	if err := h.Service.Update(uint(id), existingLaws); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Laws üýtgedilip bilinmedi"})
-	} else {
-		return c.JSON(updatedLawsResult)
 	}
+
+	// Güncellenen kaydı döndür
+	return c.JSON(existingLaws)
 }

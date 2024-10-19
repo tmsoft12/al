@@ -33,21 +33,16 @@ func (s *LawsService) GetPaginated(page int, limit int) ([]domain.Laws, int64, e
 	return laws, total, nil
 }
 func (s *LawsService) GetByID(id uint) (*domain.Laws, error) {
-	return s.Repo.FindByID(id)
+	laws := &domain.Laws{}
+	if err := s.Repo.DB.First(laws, id).Error; err != nil {
+		return nil, err
+	}
+	return laws, nil
 }
 
 func (s *LawsService) Delete(id uint) error {
 	return s.Repo.Delete(id)
 }
-func (s *LawsService) Update(id uint, updatedLaws *domain.Laws) (*domain.Laws, error) {
-	existingLaws, err := s.Repo.FindByID(id)
-	if err != nil {
-		return nil, err
-	}
-
-	if updatedLaws.Laws != "" {
-		existingLaws.Laws = updatedLaws.Laws
-	}
-
-	return existingLaws, nil
+func (s *LawsService) Update(id uint, laws *domain.Laws) error {
+	return s.Repo.DB.Model(&laws).Updates(laws).Error
 }

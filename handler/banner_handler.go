@@ -37,7 +37,10 @@ func (h *BannerHandler) Create(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	api := "api/admin"
-	banner.Image = fmt.Sprintf("http://localhost:5000/%s/%s", api, banner.Image)
+	ip := os.Getenv("BASE_URL")
+	port := os.Getenv("PORT")
+
+	banner.Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, banner.Image)
 	return c.Status(fiber.StatusCreated).JSON(banner)
 }
 
@@ -185,6 +188,6 @@ func (h *BannerHandler) Update(c *fiber.Ctx) error {
 	ip := os.Getenv("BASE_URL")
 	port := os.Getenv("PORT")
 
-	updatedBannerResult.Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, banner.Image)
+	updatedBannerResult.Image = fmt.Sprintf("http://%s:%s/%s/%s", ip, port, api, updatedBanner.Image)
 	return c.JSON(updatedBannerResult)
 }
