@@ -167,8 +167,6 @@ func (h *MediaHandler) Delete(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"message": "Media üstünlikli pozuldy"})
 }
 
-// Isgar üýtgetmek üçin funksiýa
-// Isgar üýtgetmek üçin funksiýa
 func (h *MediaHandler) Update(c *fiber.Ctx) error {
 	idStr := c.Params("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -186,27 +184,25 @@ func (h *MediaHandler) Update(c *fiber.Ctx) error {
 
 	var updatedMedia domain.Media
 	if err := c.BodyParser(&updatedMedia); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Nädogry maglumatlar"}) // Invalid data error
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Nädogry maglumatlar"})
 	}
 
-	// Check if new video file is being uploaded
 	if media.Video != "" {
-		// Delete the old video file
+
 		videoFilePath := filepath.Join(videoPath, media.Video)
 		if err := utils.DeleteFileWithRetry(videoFilePath); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": fmt.Sprintf("Wideo pozulyp bilinmedi: %v", err)}) // Error deleting video
+			return c.JSON(fiber.Map{"message": "Media file yok "})
 		}
 
-		// Create new video file name and upload the new video
 		newVideoName := fmt.Sprintf("mediaUpdate_%s", time.Now().Format("20060102150405"))
-		newVideoPath, err := utils.UploadFile(c, "video", videoPath, newVideoName) // Uploading new video
+		newVideoPath, err := utils.UploadFile(c, "video", videoPath, newVideoName)
 		if err != nil {
-			fmt.Printf("Video upload error: %v\n", err)                                                       // Log specific upload error
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Täze video ýüklenip bilinmedi"}) // New video upload failed
+			fmt.Printf("Video upload error: %v\n", err)
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Täze video ýüklenip bilinmedi"})
 		}
-		updatedMedia.Video = newVideoName + filepath.Ext(newVideoPath) // Store only the filename with extension
+		updatedMedia.Video = newVideoName + filepath.Ext(newVideoPath)
 	} else {
-		updatedMedia.Video = media.Video // Keep the old video if not updated
+		updatedMedia.Video = media.Video
 	}
 
 	// Check if new cover file is being uploaded
